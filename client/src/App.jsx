@@ -25,7 +25,7 @@ export default function App() {
   }, []);
 
   const handleLogin = () => {
-    window.location.href = '/auth/github';
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/github`;
   };
 
   const handleRepoSelect = (repo) => {
