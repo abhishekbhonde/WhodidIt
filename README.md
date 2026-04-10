@@ -1,4 +1,4 @@
-# GitBlame AI — Find the Commit That Broke Everything
+# WhoDidIt — Find the Commit That Broke Everything
 
 > Paste a bug. Point at a repo. Claude finds the exact commit that caused it.
 
@@ -6,7 +6,7 @@
 
 ## What It Does
 
-GitBlame AI is a developer tool that automates the most painful part of debugging: figuring out *which commit introduced a bug*. Instead of manually running `git bisect` or scrolling through history, you paste the error message and stack trace, select your GitHub repo, and let Claude do the investigation.
+WhoDidIt is a developer tool that automates the most painful part of debugging: figuring out *which commit introduced a bug*. Instead of manually running `git bisect` or scrolling through history, you paste the error message and stack trace, select your GitHub repo, and let Claude do the investigation.
 
 The AI uses a two-pass strategy:
 1. **Pass 1** — Reads commit messages and metadata to narrow down 3 suspects
@@ -80,7 +80,7 @@ Output includes:
 1. Go to [github.com/settings/developers](https://github.com/settings/developers)
 2. Click **New OAuth App**
 3. Fill in:
-   - **Application name**: GitBlame AI (or anything)
+   - **Application name**: WhoDidIt (or anything)
    - **Homepage URL**: `http://localhost:5173`
    - **Authorization callback URL**: `http://localhost:3001/auth/github/callback`
 4. Click **Register application**
