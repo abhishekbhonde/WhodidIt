@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react';
 
 const LANGUAGE_COLORS = {
-  JavaScript: 'bg-yellow-400',
-  TypeScript: 'bg-blue-400',
-  Python: 'bg-green-400',
-  Go: 'bg-cyan-400',
-  Rust: 'bg-orange-400',
-  Java: 'bg-red-400',
-  Ruby: 'bg-pink-400',
-  PHP: 'bg-purple-400',
-  'C++': 'bg-rose-400',
-  C: 'bg-gray-400',
-  Swift: 'bg-orange-300',
-  Kotlin: 'bg-violet-400',
-  Shell: 'bg-green-300',
-  HTML: 'bg-orange-500',
-  CSS: 'bg-blue-300',
+  JavaScript: '#FBBF24',
+  TypeScript: '#60A5FA',
+  Python:     '#4ADE80',
+  Go:         '#22D3EE',
+  Rust:       '#FB923C',
+  Java:       '#F87171',
+  Ruby:       '#F472B6',
+  PHP:        '#C084FC',
+  'C++':      '#FB7185',
+  C:          '#A8A29E',
+  Swift:      '#FCA5A5',
+  Kotlin:     '#A78BFA',
+  Shell:      '#86EFAC',
+  HTML:       '#F97316',
+  CSS:        '#38BDF8',
 };
 
 function timeAgo(dateStr) {
@@ -31,10 +31,10 @@ function timeAgo(dateStr) {
 
 function SkeletonCard() {
   return (
-    <div className="bg-gray-900 rounded-xl p-4 animate-pulse">
-      <div className="h-4 bg-gray-700 rounded w-3/4 mb-3" />
-      <div className="h-3 bg-gray-800 rounded w-1/2 mb-2" />
-      <div className="h-3 bg-gray-800 rounded w-1/4" />
+    <div className="skeleton-card">
+      <div className="skeleton-line skeleton-line--lg" />
+      <div className="skeleton-line skeleton-line--md" />
+      <div className="skeleton-line skeleton-line--sm" />
     </div>
   );
 }
@@ -61,33 +61,31 @@ export default function RepoSelector({ user, onSelect, onLogout }) {
   );
 
   return (
-    <div className="min-h-screen bg-gray-950 px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="repo-selector">
+      <div className="repo-selector__inner">
+
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white">
+        <div className="repo-selector__header">
+          <div className="repo-selector__user">
+            <div className="repo-selector__avatar">
               {user?.login?.[0]?.toUpperCase() || '?'}
             </div>
             <div>
-              <p className="text-white font-medium text-sm">{user?.login}</p>
-              <p className="text-gray-500 text-xs">Select a repository to analyze</p>
+              <p className="repo-selector__username">{user?.login}</p>
+              <p className="repo-selector__user-sub">Select a repository to analyze</p>
             </div>
           </div>
-          <button
-            onClick={onLogout}
-            className="text-gray-500 hover:text-gray-300 text-sm transition-colors cursor-pointer"
-          >
+          <button onClick={onLogout} className="repo-selector__logout">
             Logout
           </button>
         </div>
 
-        <h1 className="text-2xl font-bold text-white mb-6">Your Repositories</h1>
+        <h1 className="repo-selector__title">Your Repositories</h1>
 
         {/* Search */}
-        <div className="relative mb-6">
+        <div className="repo-selector__search-wrap">
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4"
+            className="repo-selector__search-icon"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -104,24 +102,22 @@ export default function RepoSelector({ user, onSelect, onLogout }) {
             placeholder="Search repositories..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+            className="repo-selector__search"
           />
         </div>
 
         {/* Error */}
         {error && (
-          <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 mb-6 text-red-300 text-sm">
-            {error}
-          </div>
+          <div className="repo-selector__error">{error}</div>
         )}
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="repo-selector__grid">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
             : filtered.length === 0
             ? (
-              <div className="col-span-2 text-center py-12 text-gray-500">
+              <div className="repo-selector__empty">
                 {search ? 'No repositories match your search.' : 'No repositories found.'}
               </div>
             )
@@ -129,37 +125,33 @@ export default function RepoSelector({ user, onSelect, onLogout }) {
               <button
                 key={repo.id}
                 onClick={() => onSelect(repo)}
-                className="bg-gray-900 hover:bg-gray-800 border border-gray-800 hover:border-gray-600 rounded-xl p-4 text-left transition-all cursor-pointer group"
+                className="repo-card"
               >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <span className="text-white font-medium text-sm group-hover:text-indigo-300 transition-colors truncate">
-                    {repo.name}
-                  </span>
+                <div className="repo-card__name-row">
+                  <span className="repo-card__name">{repo.name}</span>
                   {repo.private && (
-                    <span className="shrink-0 text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full border border-gray-700">
-                      Private
-                    </span>
+                    <span className="repo-card__private">Private</span>
                   )}
                 </div>
-                <p className="text-gray-500 text-xs mb-3 truncate">{repo.full_name}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
+                <p className="repo-card__full-name">{repo.full_name}</p>
+                <div className="repo-card__meta">
+                  <div className="repo-card__lang">
                     {repo.language && (
                       <>
                         <span
-                          className={`w-2.5 h-2.5 rounded-full ${
-                            LANGUAGE_COLORS[repo.language] || 'bg-gray-500'
-                          }`}
+                          className="repo-card__lang-dot"
+                          style={{ backgroundColor: LANGUAGE_COLORS[repo.language] || '#A8A29E' }}
                         />
-                        <span className="text-gray-400 text-xs">{repo.language}</span>
+                        <span className="repo-card__lang-name">{repo.language}</span>
                       </>
                     )}
                   </div>
-                  <span className="text-gray-600 text-xs">{timeAgo(repo.updated_at)}</span>
+                  <span className="repo-card__time">{timeAgo(repo.updated_at)}</span>
                 </div>
               </button>
             ))}
         </div>
+
       </div>
     </div>
   );

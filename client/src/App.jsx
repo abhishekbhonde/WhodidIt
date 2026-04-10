@@ -73,7 +73,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="app">
       {step === 'landing' && <LandingPage onLogin={handleLogin} />}
       {step === 'repo' && (
         <RepoSelector user={user} onSelect={handleRepoSelect} onLogout={handleLogout} />

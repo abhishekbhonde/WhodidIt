@@ -1,13 +1,13 @@
-const Anthropic = require('@anthropic-ai/sdk');
+const Groq = require('groq-sdk');
 const { getCommitDiff } = require('./github');
 
-const client = new Anthropic();
+const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 async function findCulpritCommit({ error, stackTrace, commits, token, owner, repo }) {
 
   // Pass 1 — narrow down suspects from commit messages + metadata
-  const pass1Response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
+  const pass1Response = await client.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
     max_tokens: 1000,
     messages: [
       {
@@ -32,7 +32,7 @@ Return ONLY valid JSON — no markdown, no explanation outside JSON:
 
   let suspects = [];
   try {
-    const text = pass1Response.content[0].text.replace(/```json|```/g, '').trim();
+    const text = pass1Response.choices[0].message.content.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(text);
     suspects = parsed.suspects || [];
   } catch (e) {
@@ -48,8 +48,8 @@ Return ONLY valid JSON — no markdown, no explanation outside JSON:
 
   const validDiffs = diffs.filter(Boolean);
 
-  const pass2Response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
+  const pass2Response = await client.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
     max_tokens: 1000,
     messages: [
       {
@@ -101,7 +101,7 @@ If you cannot determine the culprit with confidence above 40, set confidence bel
   });
 
   try {
-    const text = pass2Response.content[0].text.replace(/```json|```/g, '').trim();
+    const text = pass2Response.choices[0].message.content.replace(/```json|```/g, '').trim();
     return JSON.parse(text);
   } catch (e) {
     return {

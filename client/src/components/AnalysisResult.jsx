@@ -10,19 +10,16 @@ function CopyButton({ text, label = 'Copy' }) {
     setTimeout(() => setCopied(false), 2000);
   };
   return (
-    <button
-      onClick={handle}
-      className="text-gray-500 hover:text-gray-300 text-xs transition-colors cursor-pointer"
-    >
+    <button onClick={handle} className="copy-btn">
       {copied ? '✓ Copied' : label}
     </button>
   );
 }
 
-function Section({ title, icon, borderColor, children }) {
+function Section({ title, icon, colorClass, children }) {
   return (
-    <div className={`border-l-4 ${borderColor} bg-gray-900 rounded-xl p-5`}>
-      <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-3 flex items-center gap-2">
+    <div className={`section-card ${colorClass}`}>
+      <p className="section-card__header">
         <span>{icon}</span> {title}
       </p>
       {children}
@@ -37,25 +34,18 @@ export default function AnalysisResult({ result, loading, repo, onBack, onRestar
     return <LoadingState repo={repo} />;
   }
 
-  // Request-level error
   if (result?.error) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
-        <div className="max-w-md w-full text-center">
-          <div className="text-4xl mb-4">⚠️</div>
-          <h2 className="text-white text-xl font-bold mb-2">Analysis Failed</h2>
-          <p className="text-gray-400 text-sm mb-6">{result.error}</p>
-          <div className="flex gap-3 justify-center">
-            <button
-              onClick={onBack}
-              className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer"
-            >
+      <div className="result-error">
+        <div className="result-error__inner">
+          <span className="result-error__icon">⚠️</span>
+          <h2 className="result-error__title">Analysis Failed</h2>
+          <p className="result-error__msg">{result.error}</p>
+          <div className="result-error__actions">
+            <button onClick={onBack} className="btn btn--stone">
               ← Try Again
             </button>
-            <button
-              onClick={onRestart}
-              className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer"
-            >
+            <button onClick={onRestart} className="btn btn--stone">
               Start Over
             </button>
           </div>
@@ -68,8 +58,8 @@ export default function AnalysisResult({ result, loading, repo, onBack, onRestar
 
   if (!r) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
-        <p className="text-gray-500">No result yet.</p>
+      <div className="result-error">
+        <p style={{ color: 'var(--stone-400)' }}>No result yet.</p>
       </div>
     );
   }
@@ -84,118 +74,106 @@ export default function AnalysisResult({ result, loading, repo, onBack, onRestar
   const inconclusive = !r.culprit_commit;
 
   return (
-    <div className="min-h-screen bg-gray-950 px-4 py-8">
-      <div className="max-w-2xl mx-auto">
+    <div className="analysis-result">
+      <div className="analysis-result__inner">
 
-        {/* Sticky header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onBack}
-              className="text-gray-500 hover:text-gray-300 transition-colors cursor-pointer"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {/* Header */}
+        <div className="analysis-result__header">
+          <div className="analysis-result__back-group">
+            <button onClick={onBack} className="analysis-result__back">
+              <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-widest">Result</p>
-              <p className="text-white font-medium text-sm">{repo?.full_name}</p>
+              <p className="analysis-result__header-label">Result</p>
+              <p className="analysis-result__header-repo">{repo?.full_name}</p>
             </div>
           </div>
-          <span className="text-gray-600 text-xs">
+          <span className="analysis-result__scanned">
             {result.commits_scanned} commits scanned
           </span>
         </div>
 
         {/* Inconclusive state */}
         {inconclusive ? (
-          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 mb-6 text-center">
-            <div className="text-4xl mb-3">🤔</div>
-            <h2 className="text-white font-bold text-lg mb-2">Analysis Inconclusive</h2>
-            <p className="text-gray-400 text-sm">
+          <div className="result-inconclusive">
+            <span className="result-inconclusive__icon">🤔</span>
+            <h2 className="result-inconclusive__title">Analysis Inconclusive</h2>
+            <p className="result-inconclusive__text">
               Claude couldn't pinpoint the culprit with enough confidence. Try adding a stack trace
               or scanning more commits.
             </p>
           </div>
         ) : (
-          <>
-            {/* Section 1 — Culprit commit */}
-            <div className="mb-4">
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-3 flex items-center gap-2">
-                <span>🎯</span> Culprit Commit
-              </p>
-              <CommitCard commit={r.culprit_commit} repoFullName={repo?.full_name} />
-            </div>
-          </>
+          <div className="result-section">
+            <p className="section-label"><span>🎯</span> Culprit Commit</p>
+            <CommitCard commit={r.culprit_commit} repoFullName={repo?.full_name} />
+          </div>
         )}
 
-        {/* Section 2 — Smoking gun */}
+        {/* Smoking gun */}
         {r.smoking_gun && (
-          <div className="mb-4">
-            <Section title="Smoking Gun" icon="🔫" borderColor="border-red-500">
-              <p className="text-red-300 font-mono text-sm leading-relaxed">{r.smoking_gun}</p>
+          <div className="result-section">
+            <Section title="Smoking Gun" icon="🔫" colorClass="section-card--red">
+              <pre className="code-block code-block--red">{r.smoking_gun}</pre>
             </Section>
           </div>
         )}
 
-        {/* Section 3 — Explanation */}
+        {/* Explanation */}
         {r.explanation && (
-          <div className="mb-4">
-            <Section title="Why This Broke It" icon="💡" borderColor="border-indigo-500">
-              <p className="text-gray-200 text-sm leading-relaxed">{r.explanation}</p>
+          <div className="result-section">
+            <Section title="Why This Broke It" icon="💡" colorClass="section-card--violet">
+              <p style={{ fontSize: '0.875rem', lineHeight: 1.6, color: 'var(--stone-700)' }}>
+                {r.explanation}
+              </p>
             </Section>
           </div>
         )}
 
-        {/* Section 4 — Fix */}
+        {/* Fix */}
         {r.fix && (
-          <div className="mb-4">
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 flex items-center gap-2">
+          <div className="result-section">
+            <div className="section-card" style={{ borderLeft: '4px solid var(--stone-200)' }}>
+              <div className="section-card__header-row">
+                <p className="section-card__header">
                   <span>🔧</span> How to Fix It
                 </p>
                 <CopyButton text={r.fix} label="Copy fix" />
               </div>
-              <pre className="bg-gray-950 rounded-lg p-4 text-green-400 text-xs font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed">
-                {r.fix}
-              </pre>
+              <pre className="code-block code-block--green">{r.fix}</pre>
             </div>
           </div>
         )}
 
-        {/* Section 5 — Could have caught with */}
+        {/* Could have caught with */}
         {r.could_have_caught_with && (
-          <div className="mb-8">
-            <Section title="Test That Would Have Caught This" icon="🧪" borderColor="border-amber-500">
-              <p className="text-gray-500 text-xs mb-3">
+          <div className="result-section" style={{ marginBottom: '2rem' }}>
+            <Section title="Test That Would Have Caught This" icon="🧪" colorClass="section-card--amber">
+              <p className="section-card__hint">
                 Add this to your test suite to prevent regressions.
               </p>
-              <div className="relative">
-                <pre className="bg-gray-950 rounded-lg p-4 text-amber-300 text-xs font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed">
-                  {r.could_have_caught_with}
-                </pre>
-                <div className="mt-2 flex justify-end">
-                  <CopyButton text={r.could_have_caught_with} label="Copy test" />
-                </div>
+              <pre className="code-block code-block--amber">{r.could_have_caught_with}</pre>
+              <div className="section-card__copy-wrap">
+                <CopyButton text={r.could_have_caught_with} label="Copy test" />
               </div>
             </Section>
           </div>
         )}
 
         {/* Footer actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="result-footer">
           <button
             onClick={handleScanMore}
             disabled={scanMoreLoading}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-900 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            className="btn btn--violet"
           >
             {scanMoreLoading ? (
               <>
-                <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <svg className="animate-spin" style={{ width: '0.875rem', height: '0.875rem' }} fill="none" viewBox="0 0 24 24">
+                  <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
                 Scanning more...
               </>
@@ -203,19 +181,14 @@ export default function AnalysisResult({ result, loading, repo, onBack, onRestar
               `Scan More Commits (${(result.commits_scanned || 40) * 2} commits)`
             )}
           </button>
-          <button
-            onClick={onBack}
-            className="flex-1 bg-gray-800 hover:bg-gray-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors cursor-pointer"
-          >
+          <button onClick={onBack} className="btn btn--stone">
             Analyze Another Bug
           </button>
-          <button
-            onClick={onRestart}
-            className="sm:w-auto bg-gray-800 hover:bg-gray-700 text-gray-400 font-medium py-2.5 px-4 rounded-lg text-sm transition-colors cursor-pointer"
-          >
+          <button onClick={onRestart} className="btn btn--stone-muted" style={{ flex: 'none', padding: '0.625rem 1rem' }}>
             Start Over
           </button>
         </div>
+
       </div>
     </div>
   );
