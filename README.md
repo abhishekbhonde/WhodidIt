@@ -254,18 +254,3 @@ Landing Page (not logged in)
 
 ---
 
-## Contributing
-
-PRs welcome. Key areas to improve:
-
-- Add streaming for real-time analysis progress
-- Support org repos (requires `read:org` scope)
-- Add a "blame history" — store past analyses per user
-- Integrate with Linear/Jira to auto-create bug tickets
-- Support GitLab and Bitbucket
-
----
-
-## License
-
-MIT
